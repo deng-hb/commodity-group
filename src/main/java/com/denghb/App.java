@@ -73,18 +73,11 @@ public class App {
                         if (c2.getId().intValue() == c.getId()) {
                             exist = true;
                             c2.setNum(n);
-
-                            if (n < c.getNum()) {
-                                doGroup(j, c2List, output);
-                            }
                             break;
                         }
                     }
                     if (!exist) {
                         c2List.add(new Commodity(c, n));
-                        if (c.getNum() > 1) {
-                            doGroup(j, c2List, output);
-                        }
                     }
 
                     int weight = 0;
@@ -95,6 +88,10 @@ public class App {
                     }
 
                     output.add(new CommodityGroup(weight, c3List));
+
+                    if (c.getNum() > 1 && n < c.getNum()) {
+                        doGroup(j, c2List, output);
+                    }
                 }
             }
 

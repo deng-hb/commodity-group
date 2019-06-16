@@ -10,10 +10,10 @@ public class App {
 
     static {
 
-        list.add(new Commodity(1, "光明牛奶", 241, 5, 2));
-        list.add(new Commodity(2, "可口可乐", 356, 5, 2));
-        list.add(new Commodity(3, "农夫山泉", 513, 5, 2));
-//        list.add(new Commodity(4, "脉动饮料", 756, 5, 7));
+        list.add(new Commodity(1, "光明牛奶", 241, 5, 3));
+        list.add(new Commodity(2, "可口可乐", 356, 5, 3));
+        list.add(new Commodity(3, "农夫山泉", 513, 5, 3));
+        list.add(new Commodity(4, "脉动饮料", 756, 5, 3));
 //        list.add(new Commodity(5, "红牛饮料", 485, 5, 20));
     }
 
@@ -28,16 +28,12 @@ public class App {
                 int w = c.getWeight() * n;
                 List<Commodity> cList = Arrays.asList(new Commodity(c, n));
                 output.add(new CommodityGroup(w, cList));
-
-                for (int next = 1; next < list.size(); next++) {
-                    doGroup(i, next, cList, output);
-                }
+                doGroup(i, cList, output);
             }
 
         }
 
-        Collections.sort(output);
-
+//        Collections.sort(output);
 
         for (CommodityGroup cc : output) {
             System.out.println(cc);
@@ -51,7 +47,7 @@ public class App {
             set.add(cc.getWeight());
         }
 
-        System.out.println(String.format("size:%d;merge:%d;%dms\n\n\n", output.size(), set.size(), (System.currentTimeMillis() - start)));
+        System.out.println(String.format("size:%d;merge:%d;%dms\n\n", output.size(), set.size(), (System.currentTimeMillis() - start)));
 
 
         for (CommodityGroup cc : output) {
@@ -63,38 +59,45 @@ public class App {
 
     }
 
-    private static void doGroup(int i, int next, List<Commodity> cList, List<CommodityGroup> output) {
+    private static void doGroup(int i, List<Commodity> cList, List<CommodityGroup> output) {
 
-        List<Commodity> c2List = new ArrayList<>(cList);
-        for (int j = i + next; j < list.size(); j++) {
-            Commodity c = list.get(j);
-            for (int n = 1; n <= c.getNum(); n++) {
+        for (int next = 1; next < list.size(); next++) {
+            List<Commodity> c2List = new ArrayList<Commodity>(cList);
+            for (int j = i + next; j < list.size(); j++) {
+                Commodity c = list.get(j);
+                for (int n = 1; n <= c.getNum(); n++) {
 
-                // 存在的改变数量
-                boolean exist = false;
-                for (Commodity c2 : c2List) {
-                    if (c2.getId().intValue() == c.getId()) {
-                        exist = true;
-                        c2.setNum(n);
-                        break;
+                    // 存在的改变数量
+                    boolean exist = false;
+                    for (Commodity c2 : c2List) {
+                        if (c2.getId().intValue() == c.getId()) {
+                            exist = true;
+                            c2.setNum(n);
+
+                            if (n < c.getNum()) {
+                                doGroup(j, c2List, output);
+                            }
+                            break;
+                        }
                     }
-                }
-                if (!exist) {
-                    c2List.add(new Commodity(c, n));
-                    if (c.getNum() > 1) {
-                        doGroup(j, 1, c2List, output);
+                    if (!exist) {
+                        c2List.add(new Commodity(c, n));
+                        if (c.getNum() > 1) {
+                            doGroup(j, c2List, output);
+                        }
                     }
-                }
 
-                int weight = 0;
-                List<Commodity> c3List = new ArrayList<Commodity>();
-                for (Commodity c2 : c2List) {
-                    weight += c2.getNum() * c2.getWeight();
-                    c3List.add(new Commodity(c2, c2.getNum()));// 防止对象引用
-                }
+                    int weight = 0;
+                    List<Commodity> c3List = new ArrayList<Commodity>();
+                    for (Commodity c2 : c2List) {
+                        weight += c2.getNum() * c2.getWeight();
+                        c3List.add(new Commodity(c2, c2.getNum()));// 防止对象引用
+                    }
 
-                output.add(new CommodityGroup(weight, c3List));
+                    output.add(new CommodityGroup(weight, c3List));
+                }
             }
+
         }
     }
 }
